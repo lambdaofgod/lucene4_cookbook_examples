@@ -18,15 +18,12 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 
-import static org.junit.Assert.assertEquals;
-
 /**
  * Created by ed on 1/22/15.
  */
 public class LMDirichletSimilarityTest {
 
-    @org.junit.Test
-    public void runTest() throws Exception {
+    public static void run(String queryString) throws Exception {
 
         StandardAnalyzer analyzer = new StandardAnalyzer();
         Directory directory = new RAMDirectory();
@@ -56,14 +53,11 @@ public class LMDirichletSimilarityTest {
         IndexSearcher indexSearcher = new IndexSearcher(indexReader);
         indexSearcher.setSimilarity(similarity);
         QueryParser queryParser = new QueryParser("content", analyzer);
-        Query query = queryParser.parse("humpty dumpty");
+        Query query = queryParser.parse(queryString);
 
         TopDocs topDocs = indexSearcher.search(query, 100);
         for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
             doc = indexReader.document(scoreDoc.doc);
-            if (scoreDoc.equals(topDocs.scoreDocs[0])) {
-                assertEquals("Rank 1 score not match", 9.59, scoreDoc.score, 0.1);
-            }
             System.out.println(scoreDoc.score + ": " + doc.getField("content").stringValue());
         }
     }
