@@ -11,15 +11,17 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 
-import static org.junit.Assert.assertEquals;
-
 /**
  * Created by ed on 1/30/15.
  */
 public class SearchResultText {
 
-    @org.junit.Test
-    public void runTest() throws Exception {
+    public static String[] contents = {"Humpty Dumpty sat on a wall,",
+        "Humpty Dumpty had a great fall.",
+        "All the king's horses and all the king's men",
+        "Couldn't put Humpty together again."};
+
+    public static void run(String queryString, int retrievedResults) throws Exception {
 
         StandardAnalyzer analyzer = new StandardAnalyzer();
         Directory directory = new RAMDirectory();
@@ -29,10 +31,6 @@ public class SearchResultText {
         Document doc = new Document();
         TextField textField = new TextField("content", "", Field.Store.YES);
 
-        String[] contents = {"Humpty Dumpty sat on a wall,",
-                "Humpty Dumpty had a great fall.",
-                "All the king's horses and all the king's men",
-                "Couldn't put Humpty together again."};
         for (String content : contents) {
             textField.setStringValue(content);
             doc.removeField("content");
@@ -45,11 +43,10 @@ public class SearchResultText {
         IndexReader indexReader = DirectoryReader.open(directory);
         IndexSearcher indexSearcher = new IndexSearcher(indexReader);
         QueryParser queryParser = new QueryParser("content", analyzer);
-        Query query = queryParser.parse("humpty dumpty");
+        Query query = queryParser.parse(queryString);
 
-        TopDocs topDocs = indexSearcher.search(query, 2);
+        TopDocs topDocs = indexSearcher.search(query, retrievedResults);
         System.out.println("Total hits: " + topDocs.totalHits);
-        assertEquals("Total hits not match", 3, topDocs.totalHits);
         for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
             doc = indexReader.document(scoreDoc.doc);
             System.out.println(scoreDoc.score + ": " + doc.getField("content").stringValue());
